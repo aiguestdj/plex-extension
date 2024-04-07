@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync } from "fs"
 
 export type PlexSettings = {
+    id?: string,
     uri?: string,
     token?: string,
     pin_code?: string,

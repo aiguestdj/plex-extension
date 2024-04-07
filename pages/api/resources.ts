@@ -7,6 +7,7 @@ import { createRouter } from 'next-connect';
 
 export type GetPlexResourcesResponse = {
     name: string
+    id: string
     connections: {
         uri: string,
         local: boolean
@@ -31,11 +32,13 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                     }
                 })
 
+                console.log("result:", result)
                 const servers: GetPlexResourcesResponse[] = [];
                 result.data.forEach((item: any) => {
                     if (item.product == "Plex Media Server") {
                         servers.push({
                             name: item.name,
+                            id: item.clientIdentifier,
                             connections: item.connections.map((connection: any) => ({
                                 uri: connection.uri,
                                 local: connection.local

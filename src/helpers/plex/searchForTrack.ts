@@ -5,13 +5,11 @@ import doHubSearch from "./doHubSearch";
 export async function searchForTrack(artist: string, track: string) {
     let search = `${artist} ${track}`;
 
+    const debug = track.toLowerCase().indexOf('lune') > -1;
     // First attempt @ Plex Media Server
     {
-        const searchResult = await doHubSearch(search);
+        const searchResult = await doHubSearch(search, 5, debug);
         const result = findMatchingTracks(searchResult, artist, track);
-        if (search.indexOf('Reminisce') > -1) {
-            console.log(result)
-        }
         if (result.length > 0)
             return result;
     }
@@ -19,21 +17,27 @@ export async function searchForTrack(artist: string, track: string) {
     // Second attempt @ Plex Media Server - Looking for track only
     {
         let alternative = `${track}`;
-        if (alternative.indexOf('Reminisce') > -1) {
-            const searchResult = await doHubSearch(alternative);
-            const result = findMatchingTracks(searchResult, artist, track);
-            if (result.length > 0)
-                return result;
-        }
-    }
-
-    // Final attempt - Search on the plex search provider
-    {
-        const searchResult = await doDiscoverSearch(search);
-        // console.log("searchResult:", searchResult)
+        const searchResult = await doHubSearch(alternative, 5, debug);
         const result = findMatchingTracks(searchResult, artist, track);
         if (result.length > 0)
             return result;
     }
+
+    // Almost final attempt - Search on the plex search provider
+    {
+        const searchResult = await doDiscoverSearch(search);
+        const result = findMatchingTracks(searchResult, artist, track);
+        if (result.length > 0)
+            return result;
+    }
+    // Final attempt - Search on the plex search provider
+    {
+        let alternative = `${track}`;
+        const searchResult = await doDiscoverSearch(alternative);
+        const result = findMatchingTracks(searchResult, artist, track);
+        if (result.length > 0)
+            return result;
+    }
+
     return []
 }

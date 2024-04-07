@@ -26,7 +26,7 @@ export type GetMatchingTrackResponse = {
     }
 }
 
-export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySearchResponse)[], artist: string, track: string): GetMatchingTrackResponse[] {
+export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySearchResponse)[], artist: string, track: string, debug: boolean = false): GetMatchingTrackResponse[] {
     const foundTracks = items
         .filter(item => item.type == "track")
         .map(item => {
@@ -43,6 +43,8 @@ export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySe
                     artist: compareTitles(item.artist.title, artist),
                 }
             };
+            if (debug)
+                console.log(track, result)
             return result;
         })
         .filter(item => (item.matching.artist.match || item.matching.artist.contains) &&

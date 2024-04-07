@@ -60,6 +60,7 @@ export type Metadata = {
     parentRatingKey: string,
     grandparentRatingKey: string,
     guid: string,
+    originalTitle?:string
     parentGuid: string,
     grandparentGuid: string,
     parentStudio: string,

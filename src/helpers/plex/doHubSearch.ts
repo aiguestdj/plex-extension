@@ -45,7 +45,7 @@ export type GetHubSearchAlbumResponse = {
 }
 
 
-export default function doHubSearch(query: string, limit: number = 5) {
+export default function doHubSearch(query: string, limit: number = 5, debug: boolean = false) {
     return new Promise<GetHubSearchResponse[]>((resolve, reject) => {
         if (!plex.settings.uri || !plex.settings.token) {
             reject("No Plex connection found");
@@ -82,6 +82,8 @@ export default function doHubSearch(query: string, limit: number = 5) {
                         if (hub.type == "track" && hub.Metadata) {
                             for (let j = 0; j < hub.Metadata.length; j++) {
                                 const metadata = hub.Metadata[j];
+                                if (debug)
+                                    console.log(metadata)
                                 response.push({
                                     type: "track",
                                     key: metadata.key,
@@ -99,7 +101,7 @@ export default function doHubSearch(query: string, limit: number = 5) {
                                     artist: {
                                         guid: metadata.grandparentGuid,
                                         key: metadata.grandparentKey,
-                                        title: metadata.grandparentTitle,
+                                        title: metadata.originalTitle || metadata.grandparentTitle,
                                         image: metadata.grandparentThumb,
                                     }
                                 })

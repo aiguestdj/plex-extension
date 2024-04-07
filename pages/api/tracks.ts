@@ -9,20 +9,30 @@ export type GetTrackResponse = {
     name: string
     Result: GetMatchingTrackResponse[]
 }
-
+export type PostTrackData = {
+    artist: string,
+    name: string,
+    spotify_artist: string | null,
+    spotify_name: string | null,
+    idx: number
+}
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .post(
         async (req, res, next) => {
-            const items: { artist: string, name: string }[] = req.body.items;
+            const items: PostTrackData[] = req.body.items;
             if (!items || items.length == 0)
                 return res.status(400).json({ msg: "No items given" });
 
             const promises: Promise<GetTrackResponse>[] = []
             for (let i = 0; i < items.length && !res.destroyed; i++) {
-                const { artist, name } = items[i];
+                const { artist, name, spotify_artist, spotify_name } = items[i];
                 const promise = new Promise<GetTrackResponse>(async (resolve, reject) => {
                     try {
-                        const searchResult = await searchForTrack(artist, name)
+                        let searchResult = await searchForTrack(artist, name)
+                        if (searchResult.length == 0 && spotify_artist && spotify_name)
+                            searchResult = await searchForTrack(spotify_artist, spotify_name)
+                        console.log("spotify_artist:", spotify_artist, spotify_name)
+
                         resolve({
                             artist: artist,
                             name: name,

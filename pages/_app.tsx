@@ -17,20 +17,25 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
                 fontWeight: 200
             },
             "body-md": {
+                lineHeight: "1.4em",
                 fontWeight: 200
             },
             "body-sm": {
+                lineHeight: "1.4em",
                 fontWeight: 200
             },
             "body-xs": {
+                lineHeight: "1.4em",
                 fontWeight: 200
             },
             h1: {
                 fontSize: "1.2em",
+                lineHeight: "1.4em",
                 fontWeight: 400
             },
             h2: {
                 fontSize: "1.15em",
+                lineHeight: "1.4em",
                 fontWeight: 300
             }
         },
@@ -39,20 +44,18 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
                 styleOverrides: {
                     root: {
                         fontWeight: 300,
-                        borderRadius: 2
                     }
                 }
             },
             JoyInput: {
                 styleOverrides: {
                     root: {
-                        borderRadius: 2
                     }
                 }
             }
         }
     });
-
+    
     return (
         <>
             <Head>

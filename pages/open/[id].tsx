@@ -1,13 +1,14 @@
 import PlexTrack from '@/components/Playlists/PlexTrack';
 import { GetTrackResponse } from '@/pages/api/tracks';
 import { errorBoundary } from "@aiguestdj/shared/helpers/errorBoundary";
-import MainLayout from "@aiguestdj/shared/layouts/MainLayout";
+import MainLayout from '@aiguestdj/shared/layouts/MainLayout';
 import { GetPlaylistResponse } from "@aiguestdj/shared/types/AIGuestDJ";
 import { Box, Button, Divider, Sheet, Stack, Typography } from '@mui/joy';
 import axios from "axios";
 import { NextPage } from "next";
 import Head from "next/head";
 import { useRouter } from "next/router";
+import { enqueueSnackbar } from 'notistack';
 import { useEffect, useState } from "react";
 import { GetPlexPlaylistIdResponse } from '../api/playlists/[id]';
 
@@ -19,13 +20,14 @@ export type TrackSelection = {
 
 const Page: NextPage = () => {
 
+    const [saving, setSaving] = useState(false)
     const [loading, setLoading] = useState<boolean>(true);
     const [loadingTracks, setLoadingTracks] = useState<boolean>(false);
 
     const [tracks, setTracks] = useState<GetTrackResponse[]>([]);
     const [trackSelections, setTrackSelections] = useState<TrackSelection[]>([])
 
-    const [plexPlaylistId, setPlexPlaylistId] = useState<string>()
+    const [plexPlaylist, setPlexPlaylist] = useState<GetPlexPlaylistIdResponse>()
     const [playlist, setPlaylist] = useState<GetPlaylistResponse>()
 
     const router = useRouter();
@@ -47,7 +49,7 @@ const Page: NextPage = () => {
         if (!playlist) return;
         errorBoundary(async () => {
             const playlistResult = await axios.get<GetPlexPlaylistIdResponse>(`/api/playlists/${playlist.id}`)
-            setPlexPlaylistId(playlistResult.data.id)
+            setPlexPlaylist(playlistResult.data)
         }, () => {
         }, true)
     }, [playlist])
@@ -83,14 +85,44 @@ const Page: NextPage = () => {
         }))
     }
     const onPutPlaylistClick = () => {
+        if (!playlist) return;
+
+        const data: any = {
+            id: playlist.id,
+            name: playlist.name,
+            items: []
+        }
+        for (let i = 0; i < tracks.length; i++) {
+            const item = tracks[i];
+            const trackSelectIdx = trackSelections.filter(selectionItem => selectionItem.artist == item.artist && selectionItem.name == item.name)[0]
+            const song = item.Result[trackSelectIdx ? trackSelectIdx.index : 0];
+            if (song)
+                data.items.push({ key: song.key, source: song.source })
+        }
+
+        setSaving(true)
+        errorBoundary(async () => {
+            if (plexPlaylist) {
+                await axios.put<GetPlexPlaylistIdResponse>(`/api/playlists/${playlist.id}`, data)
+                enqueueSnackbar("Playlist updated")
+            } else {
+                const result = await axios.post<GetPlexPlaylistIdResponse>('/api/playlists', data)
+                setPlexPlaylist(result.data);
+                enqueueSnackbar("Playlist created")
+            }
+            setSaving(false)
+        }, () => {
+            setSaving(false)
+        })
 
     }
+
     return (<>
         <Head>
             <title>AI Guest DJ | Designed for Plex</title>
         </Head>
-        <MainLayout>
-            <Sheet sx={{ p: 1, md: { p: 3 }, mt: 10 }}>
+        <MainLayout type='plex'>
+            <Sheet sx={{ p: 1, md: { p: 3 }, mt: 5 }}>
                 <Box maxWidth={650} margin={"0 auto"}>
                     {playlist && <Box mt={1}>
                         <Box textAlign={"center"}>
@@ -99,8 +131,8 @@ const Page: NextPage = () => {
                         </Box>
                         <Divider sx={{ mt: 1, mb: 1 }} />
                         <Box display={'flex'} justifyContent={'center'} gap={1}>
-                            <Button loading={loading} onClick={onPutPlaylistClick}>{plexPlaylistId ? "Update" : "Create"} playlist</Button>
-                            <Button disabled={!plexPlaylistId}>Open playlist</Button>
+                            <Button disabled={loadingTracks} loading={saving} onClick={onPutPlaylistClick}>{plexPlaylist ? "Update" : "Create"} playlist</Button>
+                            <Button component="a" disabled={!plexPlaylist} href={plexPlaylist?.link} target='_blank'>Open playlist</Button>
                         </Box>
                         <Divider sx={{ mt: 1, mb: 1 }} />
                         <Stack>

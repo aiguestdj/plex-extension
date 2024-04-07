@@ -50,7 +50,6 @@ const Page: NextPage = () => {
             setConnected(true);
 
             // Do search (if uri is set)
-            console.log("settings.uri:", settings.uri)
             if (settings.uri) {
                 const result = await axios.post("api/search", { query: "x", limit: 3 }, { signal: controller.signal })
                 setValidated(true);
@@ -107,10 +106,15 @@ const Page: NextPage = () => {
             setSaving(true);
             setValidated(false);
 
+            const resource = resources.filter(item => item.connections.filter(connection => connection.uri == newPlexUri).length > 0)[0]
+            if (!resource)
+                throw new Error("Something went wrong selecting the resource")
             // Store URI
             const settings = await axios.post<GetSettingsResponse>("/api/settings", {
-                uri: newPlexUri
+                uri: newPlexUri,
+                id: resource.id
             });
+
             setSettings(settings.data);
 
             try {
@@ -121,7 +125,6 @@ const Page: NextPage = () => {
 
             }
             setSaving(false)
-            // const result = await axios.get(getPlexAPIUrl(newPlexUrl, `/hubs/search?query=X&limit=5`, plexToken));
         }, () => {
             clearTimeout(timeoutId)
             setSaving(false);
@@ -133,8 +136,8 @@ const Page: NextPage = () => {
         <Head>
             <title>AI Guest DJ | Designed for Plex</title>
         </Head>
-        <MainLayout>
-            <Sheet sx={{ minHeight: "100vh" }} className="verticalCenter">
+        <MainLayout type="plex">
+            <Sheet sx={{ minHeight: "calc(100vh - 120px)" }} className="verticalCenter">
                 <Box textAlign={"center"}>
                     <Box display={"inline-block"} padding={'5px'} boxSizing={"border-box"} bgcolor={"var(--joy-palette-neutral-700)"} component={"span"} overflow={"hidden"} borderRadius={"50%"} width={120} height={120}>
                         <Box overflow={"hidden"} borderRadius={"50%"} width={110} height={110}>
@@ -153,7 +156,7 @@ const Page: NextPage = () => {
                     }
                     {!loading && connected &&
                         <>
-                            <Button disabled={!validated} component="a" target="_blank" href={`https://aiguestdj.com?plex=${window.location.href}`}>Connect AI Guest DJ</Button>
+                            <Button disabled={!validated} component="a" target="_blank" href={`${process.env.NEXT_PUBLIC_AIGUESTDJ_URL || "https://aiguestdj.com"}/?plex=${window.location.href}`}>Connect AI Guest DJ</Button>
                             <Box maxWidth={400} margin={"0 auto"} pt={3}>
                                 {resources.length == 0 &&
                                     <Alert variant="outlined" color="danger">We didn&apos;t find Plex Media Servers on your account.</Alert>}
@@ -204,8 +207,6 @@ const Page: NextPage = () => {
                             <Button loading={creatingUrl} onClick={onPlexLoginClick}>Login to Plex</Button>
                         </>
                     }
-
-
                 </Box>
             </Sheet>
         </MainLayout>
