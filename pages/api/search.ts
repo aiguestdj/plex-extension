@@ -7,20 +7,17 @@ import { createRouter } from 'next-connect';
 const router = createRouter<NextApiRequest, NextApiResponse>()
     .post(
         async (req, res, next) => {
-            if (!req.body.query)
+            if (!req.body.query && !req.query.query)
                 return res.status(400).json({ message: "Please add a search query" });
             if (!plex.settings.uri || !plex.settings.token)
                 return res.status(400).json({ message: "No Plex connection found" });
             try {
-                const response = await doHubSearch("x")
+                const response = await doHubSearch(req.body.query || req.query.query)
                 return res.json(response)
             } catch (e) {
                 return res.status(400).json({ message: "Something went wrong while connecting to this server." })
             }
         })
-
-
-
 
 export default router.handler({
     onNoMatch: (req, res) => {

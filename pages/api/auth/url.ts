@@ -18,8 +18,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 strong: true,
                 "X-Plex-Product": "AI Guest DJ",
                 "X-Plex-Client-Identifier": process.env.PLEX_APP_ID,
-                "X-Plex-Features": "external-media%2Cindirect-media%2Chub-style-list",
-                "X-Plex-Model": "hosted",
             }))
 
             const authUrl =

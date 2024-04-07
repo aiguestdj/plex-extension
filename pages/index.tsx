@@ -157,6 +157,7 @@ const Page: NextPage = () => {
                     {!loading && connected &&
                         <>
                             <Button disabled={!validated} component="a" target="_blank" href={`${process.env.NEXT_PUBLIC_AIGUESTDJ_URL || "https://aiguestdj.com"}/?plex=${window.location.href}`}>Connect AI Guest DJ</Button>
+                            <Button sx={{ml:1}} color="neutral" loading={creatingUrl} onClick={onPlexLoginClick}>Re-login to Plex</Button>
                             <Box maxWidth={400} margin={"0 auto"} pt={3}>
                                 {resources.length == 0 &&
                                     <Alert variant="outlined" color="danger">We didn&apos;t find Plex Media Servers on your account.</Alert>}

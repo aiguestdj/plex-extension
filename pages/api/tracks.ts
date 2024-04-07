@@ -31,7 +31,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                         let searchResult = await searchForTrack(artist, name)
                         if (searchResult.length == 0 && spotify_artist && spotify_name)
                             searchResult = await searchForTrack(spotify_artist, spotify_name)
-                        console.log("spotify_artist:", spotify_artist, spotify_name)
 
                         resolve({
                             artist: artist,

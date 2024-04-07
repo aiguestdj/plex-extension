@@ -48,7 +48,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 // return res.status(200).send(body);
                 return res.status(200).send('[ ]')
             } catch (error) {
-                console.log(error)
                 return res.status(404).end();
             }
         })

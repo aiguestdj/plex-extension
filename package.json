@@ -1,6 +1,6 @@
 {
     "name": "@aiguestdj/plex-extension",
-    "version": "1.0.45",
+    "version": "1.0.46",
     "description": "Plex extension to work with AI Guest DJ",
     "scripts": {
         "deploy": "npm run build && npm version patch --no-git-tag-version && npm publish",

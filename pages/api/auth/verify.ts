@@ -12,8 +12,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 params: {
                     code: plex.settings.pin_code,
                     "X-Plex-Client-Identifier": process.env.PLEX_APP_ID,
-                    "X-Plex-Features": "external-media%2Cindirect-media%2Chub-style-list",
-                    "X-Plex-Model": "hosted",
                 }
             })
 
@@ -25,7 +23,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
 
 export default router.handler({
     onError: (err: any, req, res) => {
-        console.log(err);
         generateError(req, res, "Plex Authentication", err);
     },
 });

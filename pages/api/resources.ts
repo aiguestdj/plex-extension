@@ -32,7 +32,6 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                     }
                 })
 
-                console.log("result:", result)
                 const servers: GetPlexResourcesResponse[] = [];
                 result.data.forEach((item: any) => {
                     if (item.product == "Plex Media Server") {
