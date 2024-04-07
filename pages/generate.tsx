@@ -43,7 +43,7 @@ const Page: NextPage = () => {
     useEffect(() => {
         if (!router.isReady) return
         errorBoundary(async () => {
-            const response = await fetchJsonp(`${process.env.NEXT_PUBLIC_AIGUESTDJ_URL || "https://aiguestdj.com"}/api/user`, { jsonpCallbackFunction: 'callback' })
+            const response = await fetchJsonp(`${process.env.NEXT_PUBLIC_AIGUESTDJ_URL || "https://aiguestdj.com"}/api/user?cb=cb`, { jsonpCallbackFunction: 'cb' })
             const result = await response.json<User>();
             if (result.id) {
                 const user: User = { id: result.id }

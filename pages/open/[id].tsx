@@ -121,7 +121,7 @@ const Page: NextPage = () => {
         <Head>
             <title>AI Guest DJ | Designed for Plex</title>
         </Head>
-        <MainLayout type='plex'>
+        <MainLayout type='plex' loading={loading}>
             <Sheet sx={{ p: 1, md: { p: 3 }, mt: 5 }}>
                 <Box maxWidth={650} margin={"0 auto"}>
                     {playlist && <Box mt={1}>

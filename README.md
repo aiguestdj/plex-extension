@@ -30,7 +30,7 @@ docker run -d \
     --name=aiguestdj-plex \
     --network=host \
     --restart on-failure:4 \
-    aiguestdj/plex-extension
+    aiguestdj/plex-extension-aiguestdj
 ```
 
 ## Portainer installation
@@ -49,7 +49,7 @@ services:
             - PORT=9020
             - OPENAI_KEY=PASTE_YOUR_OPEN_AI_API_KEY_HERE
         network_mode: "host"
-        image: 'aiguestdj/plex-extension:latest'
+        image: 'aiguestdj/plex-extension-aiguestdj:latest'
 ```
 
 ## Manual installation
