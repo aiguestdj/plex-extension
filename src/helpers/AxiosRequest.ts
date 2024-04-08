@@ -16,7 +16,7 @@ export const AxiosRequest = {
         )
     },
     post<T>(url: string, token: string) {
-        return axios.post<T>(url,
+        return axios.post<T>(url, {},
             {
                 httpsAgent: agent,
                 headers: {
@@ -27,7 +27,7 @@ export const AxiosRequest = {
         )
     },
     put<T>(url: string, token: string) {
-        return axios.put<T>(url,
+        return axios.put<T>(url, {},
             {
                 httpsAgent: agent,
                 headers: {
