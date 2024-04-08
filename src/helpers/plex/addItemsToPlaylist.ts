@@ -1,6 +1,6 @@
 import getAPIUrl from '@/helpers/getAPIUrl';
 import { plex } from '@/library/plex';
-import axios from 'axios';
+import { AxiosRequest } from '../AxiosRequest';
 import { getUri } from './getUri';
 
 export async function addItemsToPlaylist(id: string, items: { key: string; source?: string; }[]) {
@@ -13,26 +13,15 @@ export async function addItemsToPlaylist(id: string, items: { key: string; sourc
         const uri = getUri(item.key, item.source);
         const putRequestUrl = `${url}?uri=${encodeURIComponent(uri)}`;
         try {
-            await axios.put(putRequestUrl, {}, {
-                headers: {
-                    'Accept': 'application/json',
-                    'X-Plex-Token': plex.settings.token
-                }
-            });
+            await AxiosRequest.put(putRequestUrl, plex.settings.token)
         } catch (e) {
             // Wait for 1 sec. and try again
             await (new Promise((resolve) => {
                 setTimeout(resolve, 1000);
             }));
             try {
-                await axios.put(putRequestUrl, {}, {
-                    headers: {
-                        'Accept': 'application/json',
-                        'X-Plex-Token': plex.settings.token
-                    }
-                });
-            } catch (e) {
-            }
+                await AxiosRequest.put(putRequestUrl, plex.settings.token)
+            } catch (e) { }
         }
     }
 

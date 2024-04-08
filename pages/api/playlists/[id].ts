@@ -1,11 +1,10 @@
+import { AxiosRequest } from '@/helpers/AxiosRequest';
 import getAPIUrl from '@/helpers/getAPIUrl';
-import getPlexAPIUrl from '@/helpers/getPlexAPIUrl';
 import { addItemsToPlaylist } from '@/helpers/plex/addItemsToPlaylist';
 import { removeItemsFromPlaylist } from '@/helpers/plex/removeItemsFromPlaylist';
 import { plex } from '@/library/plex';
 import { GetPlaylistResponse } from '@/types/PlexAPI';
 import { generateError } from '@aiguestdj/shared/helpers/generateError';
-import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -28,8 +27,8 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 return res.status(404).json({ error: `Playlist not found connected to ${id}` })
 
             // Check the existence
-            const url = getPlexAPIUrl(plex.settings.uri, `/playlists`, plex.settings.token);
-            const result = await axios.get<GetPlaylistResponse>(url);
+            const url = getAPIUrl(plex.settings.uri, `/playlists`);
+            const result = await AxiosRequest.get<GetPlaylistResponse>(url, plex.settings.token);
             const playlist = result.data.MediaContainer.Metadata.filter(item => item.ratingKey == playlistIds.plex)[0];
             if (!playlist)
                 return res.status(404).json({ error: `Playlist not found with id ${playlistIds.plex}` })
@@ -56,15 +55,15 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 return res.status(404).json({ error: `Playlist not found connected to ${id}` })
 
             // Check the existence
-            const url = getPlexAPIUrl(plex.settings.uri, `/playlists`, plex.settings.token);
-            const result = await axios.get<GetPlaylistResponse>(url);
+            const url = getAPIUrl(plex.settings.uri, `/playlists`);
+            const result = await AxiosRequest.get<GetPlaylistResponse>(url, plex.settings.token);
             const playlist = result.data.MediaContainer.Metadata.filter(item => item.ratingKey == playlistIds.plex)[0];
             if (!playlist)
                 return res.status(404).json({ error: `Playlist not found with id ${playlistIds.plex}` })
 
             // Clear items from playlist
             await removeItemsFromPlaylist(playlist.ratingKey);
-            
+
             // Add all items
             await addItemsToPlaylist(playlist.ratingKey, items)
 

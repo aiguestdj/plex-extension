@@ -1,9 +1,8 @@
+import { AxiosRequest } from '@/helpers/AxiosRequest';
 import getAPIUrl from '@/helpers/getAPIUrl';
-import getPlexAPIUrl from '@/helpers/getPlexAPIUrl';
 import { plex } from '@/library/plex';
 import { GetPlaylistResponse, Playlist } from '@/types/PlexAPI';
 import { generateError } from '@aiguestdj/shared/helpers/generateError';
-import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 import { addItemsToPlaylist } from '../../../src/helpers/plex/addItemsToPlaylist';
@@ -24,8 +23,8 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                 return;
             }
 
-            const url = getPlexAPIUrl(plex.settings.uri, `/playlists`, plex.settings.token);
-            const plexData = (await axios.get<GetPlaylistResponse>(url)).data;
+            const url = getAPIUrl(plex.settings.uri, `/playlists`);
+            const plexData = (await AxiosRequest.get<GetPlaylistResponse>(url, plex.settings.token)).data;
             const result: GetPlexPlaylistResponse[] = []
             plexData.MediaContainer.Metadata.forEach((item) => {
                 if (!item.smart && item.playlistType == 'audio') {

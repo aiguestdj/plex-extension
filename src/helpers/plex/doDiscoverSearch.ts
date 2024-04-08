@@ -1,6 +1,7 @@
 import { plex } from "@/library/plex";
 import { DiscoveryMetadata, DiscoverySearchResponse, DiscoverySearchResult } from "@/types/PlexAPI";
 import axios from "axios";
+import { AxiosRequest } from "../AxiosRequest";
 
 
 export type GetDiscoverySearchResponse = (GetDiscoverySearchAlbumResponse | GetDiscoverySearchTrackResponse)
@@ -44,10 +45,8 @@ export default function doDiscoverSearch(query: string, limit: number = 5) {
             return;
         }
 
-        const url = `https://discover.provider.plex.tv/library/search?query=${encodeURIComponent(query)}&limit=${limit}&searchTypes=music&searchProviders=discover%2CplexAVOD%2Ctidal` +
-            `&X-Plex-Token=${plex.settings.token}`;
-
-        axios.get<DiscoverySearchResponse>(url)
+        const url = `https://discover.provider.plex.tv/library/search?query=${encodeURIComponent(query)}&limit=${limit}&searchTypes=music&searchProviders=discover%2CplexAVOD%2Ctidal`;
+        AxiosRequest.get<DiscoverySearchResponse>(url, plex.settings.token)
             .then(async (result) => {
                 const tidal = result.data.MediaContainer.SearchResults.filter((item: any) => item.id == "tidal")[0];
                 const response: GetDiscoverySearchResponse[] = [];
@@ -80,13 +79,13 @@ export default function doDiscoverSearch(query: string, limit: number = 5) {
                                 try {
                                     const url = `https://music.provider.plex.tv${metadata.key}?X-Plex-Token=${plex.settings.token}`;
                                     const getTrack = await axios.get(url);
-                                    const trackData= getTrack.data.MediaContainer.Metadata[0];
+                                    const trackData = getTrack.data.MediaContainer.Metadata[0];
                                     if (artist == 'Various Artists' && trackData)
                                         artist = trackData.originalTitle;
-                                
-                                    if(thumb.indexOf('rovicorp') > -1 && trackData?.parentThumb?.indexOf('rovicorp') == -1)
+
+                                    if (thumb.indexOf('rovicorp') > -1 && trackData?.parentThumb?.indexOf('rovicorp') == -1)
                                         thumb = trackData.parentThumb
-                                    if(thumb.indexOf('rovicorp') > -1 && trackData?.grandparentThumb?.indexOf('rovicorp') == -1)
+                                    if (thumb.indexOf('rovicorp') > -1 && trackData?.grandparentThumb?.indexOf('rovicorp') == -1)
                                         thumb = trackData.parentThumb
                                 } catch (e) {
                                 }

@@ -1,8 +1,8 @@
-import getPlexAPIUrl from '@/helpers/getPlexAPIUrl';
+import { AxiosRequest } from '@/helpers/AxiosRequest';
+import getAPIUrl from '@/helpers/getAPIUrl';
 import { plex } from '@/library/plex';
 import { GetPlaylistResponse } from '@/types/PlexAPI';
 import { generateError } from '@aiguestdj/shared/helpers/generateError';
-import axios from 'axios';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
 
@@ -19,9 +19,9 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             }
 
             // Check the existence
-            const url = getPlexAPIUrl(plex.settings.uri, `/playlists/66012/items?type=audio`, plex.settings.token);
+            const url = getAPIUrl(plex.settings.uri, `/playlists/66012/items?type=audio`);
             // const url = getPlexAPIUrl(plex.settings.uri, `/library/metadata/33932`, plex.settings.token);
-            const result = await axios.get<GetPlaylistResponse>(url);
+            const result = await AxiosRequest.get<GetPlaylistResponse>(url, plex.settings.token);
             console.log(result.data)
 
             //////////////////////////////////////////////////////
@@ -39,7 +39,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             //////////////////////////////////////////////////////
 
             // @ts-ignore
-            console.log(result.data.MediaContainer.Metadata[result.data.MediaContainer.Metadata.length-1].Media.map(item=>item.Part))
+            console.log(result.data.MediaContainer.Metadata[result.data.MediaContainer.Metadata.length - 1].Media.map(item => item.Part))
             res.json({ loggedin: !!plex.settings.token, uri: plex.settings.uri })
         })
 

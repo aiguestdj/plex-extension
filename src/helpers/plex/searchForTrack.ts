@@ -5,7 +5,7 @@ import doHubSearch from "./doHubSearch";
 export async function searchForTrack(artist: string, track: string) {
     let search = `${artist} ${track}`;
 
-    const debug = track.toLowerCase().indexOf('lune') > -1;
+    const debug = false;
     // First attempt @ Plex Media Server
     {
         const searchResult = await doHubSearch(search, 5, debug);

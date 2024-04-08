@@ -1,7 +1,7 @@
 import { plex } from "@/library/plex"
 import { HubSearchResponse, Metadata } from "@/types/PlexAPI"
-import axios from "axios"
-import getPlexAPIUrl from "../getPlexAPIUrl"
+import { AxiosRequest } from "../AxiosRequest"
+import getAPIUrl from "../getAPIUrl"
 
 export type GetHubSearchResponse = (GetHubSearchAlbumResponse | GetHubSearchTrackResponse)
 export type GetHubSearchTrackResponse = {
@@ -52,8 +52,8 @@ export default function doHubSearch(query: string, limit: number = 5, debug: boo
             return;
         }
 
-        const url = getPlexAPIUrl(plex.settings.uri, `/hubs/search?query=${encodeURIComponent(query)}&limit=${limit}`, plex.settings.token);
-        axios.get<HubSearchResponse>(url)
+        const url = getAPIUrl(plex.settings.uri, `/hubs/search?query=${encodeURIComponent(query)}&limit=${limit}`);
+        AxiosRequest.get<HubSearchResponse>(url, plex.settings.token)
             .then((result) => {
                 const response: GetHubSearchResponse[] = [];
                 if (result.data.MediaContainer.Hub.length > 0) {

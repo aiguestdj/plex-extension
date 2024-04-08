@@ -1,7 +1,7 @@
 import getAPIUrl from '@/helpers/getAPIUrl';
 import { plex } from '@/library/plex';
 import { GetPlaylistResponse } from '@/types/PlexAPI';
-import axios from 'axios';
+import { AxiosRequest } from '../AxiosRequest';
 
 export async function storePlaylist(name: string, uri: string) {
     if (!plex.settings.uri || !plex.settings.token)
@@ -14,12 +14,7 @@ export async function storePlaylist(name: string, uri: string) {
         smart: "0",
         uri: uri
     });
-    const result = await axios.post<GetPlaylistResponse>(url + "?" + query.toString(), {}, {
-        headers: {
-            'Accept': 'application/json',
-            'X-Plex-Token': plex.settings.token
-        }
-    });
+    const result = await AxiosRequest.post<GetPlaylistResponse>(url + "?" + query.toString(), plex.settings.token)
     const id = result.data.MediaContainer.Metadata[0].ratingKey;
     return id;
 }
