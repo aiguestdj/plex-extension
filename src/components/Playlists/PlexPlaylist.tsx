@@ -17,6 +17,10 @@ type Props = {
 export default function PlexPlaylist(props: Props) {
     const { playlist } = props
 
+    const pageSize = 30;
+    const [page, setPage] = useState<number>(0);
+    const [totalPages, setTotalPages] = useState<number>(0);
+
     const [saving, setSaving] = useState(false)
     const [loadingTracks, setLoadingTracks] = useState<boolean>(false);
 
@@ -28,8 +32,12 @@ export default function PlexPlaylist(props: Props) {
     // Check for existing playlists
     useEffect(() => {
         if (!playlist) return;
+
+        setTotalPages(Math.ceil(playlist.tracks.length / pageSize))
+
         errorBoundary(async () => {
             const playlistResult = await axios.get<GetPlexPlaylistIdResponse>(`/api/playlists/${playlist.id}`)
+            setPage(0);
             setPlexPlaylist(playlistResult.data)
         }, () => {
         }, true)
@@ -117,6 +125,11 @@ export default function PlexPlaylist(props: Props) {
 
     }
 
+    const visibleTracks = playlist.tracks.slice(page * pageSize, (page * pageSize) + pageSize)
+    let curEnd = (page * pageSize) + pageSize;
+    if(curEnd > playlist.tracks.length)
+        curEnd = playlist.tracks.length;
+
     return (<Box mt={1}>
         <Box textAlign={"center"}>
             <Typography level="h2">{playlist.name}</Typography>
@@ -131,7 +144,16 @@ export default function PlexPlaylist(props: Props) {
         </Box>
         <Divider sx={{ mt: 1, mb: 1 }} />
         <Stack>
-            {playlist.tracks.map(track => {
+            {totalPages > 0 &&
+                <Box display={'flex'} mb={1} justifyContent={'space-between'}>
+                    <Button disabled={page <= 0} onClick={() => setPage(page => page - 1)}>Previous</Button>
+                    <Box>
+                        Showing {page * pageSize} - {curEnd}
+                    </Box>
+                    <Button disabled={page >= totalPages - 1} onClick={() => setPage(page => page + 1)}>Next</Button>
+                </Box>
+            }
+            {visibleTracks.map(track => {
                 const data = tracks.filter(item => track.artist == item.artist && track.name == item.name)[0];
                 const trackSelectIdx = trackSelections.filter(item => item.artist == track.artist && item.name == track.name)[0]
                 const songIdx = trackSelectIdx ? trackSelectIdx.index : 0;

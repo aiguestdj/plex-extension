@@ -23,7 +23,10 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             if (!items || items.length == 0)
                 return res.status(400).json({ msg: "No items given" });
 
-            const promises: Promise<GetTrackResponse>[] = []
+            let promises: Promise<GetTrackResponse>[] = []
+            let result: PromiseSettledResult<Awaited<GetTrackResponse>>[] = []
+            let request_cap = 15;
+            
             for (let i = 0; i < items.length && !res.destroyed; i++) {
                 const { artist, name, spotify_artist, spotify_name } = items[i];
                 const promise = new Promise<GetTrackResponse>(async (resolve, reject) => {
@@ -41,13 +44,21 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
                         reject("Something went wrong while searching")
                     }
                 })
+
+                // Batch play
                 promises.push(promise)
+                if (promises.length == request_cap) {
+                    result = result.concat(await Promise.allSettled(promises));
+                    promises = [];
+                }
             }
 
+             //@ts-ignore
+             if (promises.length > 0)
+                result = result.concat(await Promise.allSettled(promises));
 
-            //@ts-ignore
-            const result: GetTrackResponse[] = (await Promise.allSettled(promises)).filter(item => item.status == "fulfilled").map(item => item.value)
-            res.status(200).json(result);
+            // const result = (await Promise.allSettled(promises)).filter(item => item.status == "fulfilled").map(item => item.value)
+            res.status(200).json(result.filter(item => item.status == "fulfilled").map(item => item.status == "fulfilled" ? item.value : null));
         })
 
 
