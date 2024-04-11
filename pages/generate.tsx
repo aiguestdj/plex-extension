@@ -86,13 +86,13 @@ const Page: NextPage = () => {
             <Sheet sx={{ minHeight: "calc(100vh - 120px)" }}>
                 <Sheet sx={{ position: "relative", p: 1, pt: 5, pb: 18 }} variant="soft" color="primary">
                     <Box sx={{ position: "absolute", pointerEvents: "none", bottom: "-150px", left: 0, width: "100%", overflow: "hidden", height: 480 }}>
-                        <Box sx={{ position: "absolute", width: "4000px", left: "50%", height: "100%", marginLeft: "-2000px", bottom:170, "& svg path": { fill: "var(--joy-palette-neutral-900, #0B0D0E)" } }}>
+                        <Box sx={{ position: "absolute", width: "4000px", left: "50%", height: "100%", marginLeft: "-2000px", bottom: 170, "& svg path": { fill: "var(--joy-palette-neutral-900, #0B0D0E)" } }}>
                             <div dangerouslySetInnerHTML={{
                                 __html: `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="#0099ff" fill-opacity="1" d="M0,192L80,176C160,160,320,128,480,133.3C640,139,800,181,960,181.3C1120,181,1280,139,1360,117.3L1440,96L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z"></path></svg>`
                             }}></div>
                         </Box>
                     </Box>
-                    <Box maxWidth={650} margin={"0 auto"}>
+                    <Box maxWidth={650} p={3} margin={"0 auto"}>
                         {error &&
                             <Box maxWidth={600} margin={"0 auto"} mt={2}>
                                 <Alert color="danger" size="sm" variant="outlined">Open AI is not connected. Please update your API key and try again.</Alert>
@@ -126,13 +126,13 @@ const Page: NextPage = () => {
                 </Sheet>
                 <Sheet>
                     {!user?.id &&
-                        <Box maxWidth={600} margin={"0 auto"} mt={6} textAlign={"left"}>
+                        <Box maxWidth={600} p={3} margin={"0 auto"} mt={6} textAlign={"left"}>
                             <Alert color="danger">You&apos;re not signed in, your playlist will not be connected to your AI Guest DJ account.</Alert>
                         </Box>
                     }
 
                     {!error && profile &&
-                        <Box maxWidth={600} margin={"0 auto"} mt={1} textAlign={"left"}>
+                        <Box maxWidth={600} p={3} margin={"0 auto"} mt={1} textAlign={"left"}>
                             <AccordionGroup variant="outlined">
                                 <Accordion>
                                     <AccordionSummary>Prompt history & tokens spent</AccordionSummary>

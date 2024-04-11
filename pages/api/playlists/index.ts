@@ -39,10 +39,11 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
         })
     .post(
         async (req, res, next) => {
+            const type: string = req.body.type;
             const name: string = req.body.name;
             const id: string = req.body.id;
             const items: { key: string, source?: string }[] = req.body.items;
-            if (!items || items.length == 0 || !name || !id)
+            if (!items || items.length == 0 || !name || !id || !type)
                 return res.status(400).json({ msg: "Invalid data given" });
 
             if (!plex.settings.uri || !plex.settings.token || !plex.settings.id) {
@@ -58,7 +59,7 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             const playlistId = await storePlaylist(name, getUri(firstItem.key, firstItem.source))
             await addItemsToPlaylist(playlistId, items)
 
-            plex.savePlaylist(id, playlistId)
+            plex.savePlaylist(type, id, playlistId)
 
             const link = getAPIUrl(plex.settings.uri, `/web/index.html#!/server/${plex.settings.id}/playlist?key=${encodeURIComponent(`/playlists/${playlistId}`)}`)
             res.json({ id: playlistId, link: link })

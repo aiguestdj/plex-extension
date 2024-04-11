@@ -8,12 +8,12 @@ export type PlexSettings = {
     pin_id?: string
 }
 export type PlexPlaylists = {
-    data?: { id: string, plex: string }[]
+    data?: { type: string, id: string, plex: string }[]
 }
 declare global {
     var _plex: {
         saveConfig: (settings: PlexSettings) => void
-        savePlaylist: (id: string, plex: string) => void
+        savePlaylist: (type: string, id: string, plex: string) => void
         settings: PlexSettings
         playlists: PlexPlaylists
     }
@@ -44,9 +44,9 @@ if (!_plex) {
             _plex.settings = { ...plex.settings, ...settings };
             writeFileSync('config/plex.json', JSON.stringify(_plex.settings, null, 2), 'utf8');
         },
-        savePlaylist: (id: string, plexId: string) => {
+        savePlaylist: (type: string, id: string, plexId: string) => {
             const playlists = _plex.playlists.data || []
-            playlists.push({ id: id, plex: plexId })
+            playlists.push({ type: type, id: id, plex: plexId })
             _plex.playlists = { ..._plex.playlists, data: playlists };
             writeFileSync('config/playlists.json', JSON.stringify(_plex.playlists, null, 2), 'utf8');
         },

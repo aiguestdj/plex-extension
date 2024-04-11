@@ -7,7 +7,7 @@ type Props = {
     track: {
         artist: string;
         name: string;
-        reason: string;
+        reason?: string;
     },
     data?: GetTrackResponse
     songIdx: number
@@ -35,7 +35,7 @@ export default function PlexTrack(props: Props) {
         loading={props.loading}
         trackName={props.track.name}
         artistName={props.track.artist}
-        reason={props.track.reason}
+        reason={props.track.reason || ''}
         songs={songs}
         songIdx={props.songIdx}
         setSongIdx={props.setSongIdx}

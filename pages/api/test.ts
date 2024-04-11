@@ -1,7 +1,6 @@
 import { AxiosRequest } from '@/helpers/AxiosRequest';
 import getAPIUrl from '@/helpers/getAPIUrl';
 import { plex } from '@/library/plex';
-import { GetPlaylistResponse } from '@/types/PlexAPI';
 import { generateError } from '@aiguestdj/shared/helpers/generateError';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { createRouter } from 'next-connect';
@@ -19,10 +18,16 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             }
 
             // Check the existence
-            const url = getAPIUrl(plex.settings.uri, `/playlists/66012/items?type=audio`);
+            let url = getAPIUrl(plex.settings.uri, `/playlists/66012/items?type=audio`);
+            // const url = getAPIUrl(plex.settings.uri, `/library/metadata/5b888afc00a1e90031fe134f`);
+            // const url = `https://discover.provider.plex.tv/library/metadata/5b888afc00a1e90031fe1344`
             // const url = getPlexAPIUrl(plex.settings.uri, `/library/metadata/33932`, plex.settings.token);
-            const result = await AxiosRequest.get<GetPlaylistResponse>(url, plex.settings.token);
-            console.log(result.data)
+            const query = 'Surfing To Some F#*ked Up S@!t';
+            const limit = 5;
+            url = `https://discover.provider.plex.tv/library/search?query=${encodeURIComponent(query)}&limit=${limit}&searchTypes=music&searchProviders=discover%2CplexAVOD%2Ctidal`;
+
+            const result = await AxiosRequest.get<any>(url, plex.settings.token);
+            console.log(result.data.MediaContainer.SearchResults[0].SearchResult)
 
             //////////////////////////////////////////////////////
             //
@@ -39,7 +44,8 @@ const router = createRouter<NextApiRequest, NextApiResponse>()
             //////////////////////////////////////////////////////
 
             // @ts-ignore
-            console.log(result.data.MediaContainer.Metadata[result.data.MediaContainer.Metadata.length - 1].Media.map(item => item.Part))
+            // console.log(result.data.MediaContainer.Metadata[result.data.MediaContainer.Metadata.length - 1])
+            // console.log(result.data.MediaContainer.Metadata[result.data.MediaContainer.Metadata.length - 1].Media.map(item => item.Part))
             res.json({ loggedin: !!plex.settings.token, uri: plex.settings.uri })
         })
 
@@ -49,6 +55,7 @@ export default router.handler({
         res.status(200).json({})
     },
     onError: (err: any, req, res) => {
+        console.log(err)
         generateError(req, res, "Songs", err);
     }
 });
