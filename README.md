@@ -52,46 +52,6 @@ services:
         image: 'aiguestdj/plex-extension-aiguestdj:latest'
 ```
 
-## Manual installation
-
-AI Guest DJ is built using [NextJS v13](https://nextjs.org/) so you should be running `node 18` or higher. You can install and run this extension in two different ways.
-
-### Local
-
-To install it in a specific folder/project run the following command.
-
-```sh
-npm install @aiguestdj/plex-extension
-```
-
-To start it use the `npx` command.
-
-```sh
-npx aiguestdj-plex
-```
-
-### Global
-
-To install it globally on your machine, run the following command.
-
-```sh
-npm install @aiguestdj/plex-extension -g
-```
-
-To start the plex extension run the following command. Once up and running you will find the instance at http://[ipaddress]:9020. 
-
-```sh
-aiguestdj-plex
-```
-
-### Change Port number
-
-You can change the port number by setting the `PORT` environment variable.
-
-```sh
-PORT=9020 aiguestdj-plex
-```
-
 ## Development
 
 The extension is build using NextJS. So you can also checkout this repo and simply use the next commands like `npm run dev`, `npm run build` and `npm run start`.
