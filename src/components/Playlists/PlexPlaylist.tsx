@@ -3,7 +3,7 @@ import { GetTrackResponse } from "@/pages/api/tracks";
 import { TrackSelection } from "@/pages/open/[id]";
 import { errorBoundary } from "@aiguestdj/shared/helpers/errorBoundary";
 import { GetPlaylistResponse, GetSpotifyAlbum, GetSpotifyPlaylist } from "@aiguestdj/shared/types";
-import { Box, Button, Divider, Stack, Typography } from "@mui/joy";
+import { Alert, Box, Button, Divider, Stack, Typography } from "@mui/joy";
 import axios from "axios";
 import { enqueueSnackbar } from "notistack";
 import { useEffect, useState } from "react";
@@ -22,6 +22,10 @@ export default function PlexPlaylist(props: Props) {
     const [totalPages, setTotalPages] = useState<number>(0);
 
     const [saving, setSaving] = useState(false)
+
+    const [tracksToLoad, setTracksToLoad] = useState<number>()
+    const [tracksNotFound, setTracksNotFound] = useState<number>(0)
+    const [tracksLoaded, setTracksLoaded] = useState<number>()
     const [loadingTracks, setLoadingTracks] = useState<boolean>(false);
 
     const [tracks, setTracks] = useState<GetTrackResponse[]>([]);
@@ -43,34 +47,76 @@ export default function PlexPlaylist(props: Props) {
         }, true)
     }, [playlist])
 
+    const loadPlaylistTracks = async (controller: AbortController, items: { artist: string, name: string, spotify_artist?: string, spotify_name?: string }[]) => {
+
+        const pageSize = 50;
+        let curPage = 0;
+        const pages = Math.ceil(items.length / pageSize);
+        let results: GetTrackResponse[] = []
+
+        setTracksToLoad(items.length);
+
+        while (curPage < pages) {
+            const startIndex = curPage * pageSize;
+            setTracksLoaded(startIndex)
+            const endIndex = startIndex + pageSize;
+            try {
+                const result = await axios.post<GetTrackResponse[]>('/api/tracks', {
+                    items: items.slice(startIndex, endIndex)
+                }, { signal: controller.signal })
+                results = results.concat(result.data)
+                setTracksNotFound(value => value + result.data.filter(item => item.Result.length == 0).length)
+            } catch (e) {
+                // Try again
+                try {
+                    const result = await axios.post<GetTrackResponse[]>('/api/tracks', {
+                        items: items.slice(startIndex, endIndex)
+                    }, { signal: controller.signal })
+                    results = results.concat(result.data)
+                    setTracksNotFound(value => value + result.data.filter(item => item.Result.length == 0).length)
+                } catch (e) {
+                    setTracksNotFound(value => value + pageSize)
+                }
+            }
+
+            curPage++;
+        }
+
+        return results;
+    }
 
     // Load tracks
     useEffect(() => {
         if (!playlist) return;
+
+        setTracksNotFound(0)
 
         setLoadingTracks(true);
         const controller = new AbortController();
         errorBoundary(async () => {
             switch (playlist.type) {
                 case "spotify-playlist":
+                    {
+                        const tracks = playlist.tracks.map(item => ({ artist: item.artist, name: item.name, spotify_artist: item.artists.length > 1 ? item.artists[1] : undefined, spotify_name: item.name }))
+                        const result = await loadPlaylistTracks(controller, tracks)
+                        setTracks(result);
+                        setTrackSelections(result.map(item => ({ artist: item.artist, name: item.name, index: 0 })))
+                    }
+                    break;
                 case "spotify-album":
                     {
                         const tracks = playlist.tracks.map(item => ({ artist: item.artist, name: item.name }))
-                        const result = await axios.post<GetTrackResponse[]>('/api/tracks', {
-                            items: tracks
-                        }, { signal: controller.signal })
-                        setTracks(result.data);
-                        setTrackSelections(result.data.map(item => ({ artist: item.artist, name: item.name, index: 0 })))
+                        const result = await loadPlaylistTracks(controller, tracks)
+                        setTracks(result);
+                        setTrackSelections(result.map(item => ({ artist: item.artist, name: item.name, index: 0 })))
                     }
                     break;
                 default:
                     {
-                        const tracks = playlist.tracks.map(item => ({ artist: item.artist, name: item.name, spotify_artist: item.spotify_artist ? item.spotify_artist.split(",")[0] : null, spotify_name: item.spotify_name }))
-                        const result = await axios.post<GetTrackResponse[]>('/api/tracks', {
-                            items: tracks
-                        }, { signal: controller.signal })
-                        setTracks(result.data);
-                        setTrackSelections(result.data.map(item => ({ artist: item.artist, name: item.name, index: 0 })))
+                        const tracks = playlist.tracks.map(item => ({ artist: item.artist, name: item.name, spotify_artist: item.spotify_artist ? item.spotify_artist.split(",")[0] : undefined, spotify_name: item.spotify_name || undefined }))
+                        const result = await loadPlaylistTracks(controller, tracks)
+                        setTracks(result);
+                        setTrackSelections(result.map(item => ({ artist: item.artist, name: item.name, index: 0 })))
                     }
                     break;
             }
@@ -127,15 +173,27 @@ export default function PlexPlaylist(props: Props) {
 
     const visibleTracks = playlist.tracks.slice(page * pageSize, (page * pageSize) + pageSize)
     let curEnd = (page * pageSize) + pageSize;
-    if(curEnd > playlist.tracks.length)
+    if (curEnd > playlist.tracks.length)
         curEnd = playlist.tracks.length;
 
+    console.log(loadingTracks)
     return (<Box mt={1}>
         <Box textAlign={"center"}>
             <Typography level="h2">{playlist.name}</Typography>
-            {playlist.type != 'spotify-album' && playlist.type != 'spotify-playlist' && playlist.prompt &&
-                <Typography level="body-sm" fontStyle={"italic"}>{playlist.prompt}</Typography>
+            {
+                (playlist.type != 'spotify-album' && playlist.type != 'spotify-playlist' && playlist.prompt) ?
+                    <Typography level="body-sm" fontStyle={"italic"}>{playlist.prompt}</Typography>
+                    :
+                    <Typography level="body-sm" fontStyle={"italic"}>{playlist.tracks.length} songs {tracksNotFound > 0 ? `(${tracksNotFound} missing)` : ``}</Typography>
             }
+
+            {loadingTracks &&
+                <Box mt={1} mb={1}>
+                    <Alert size="sm" variant="outlined" sx={{ textAlign: 'center' }}>Loading tracks  ({tracksLoaded}/{tracksToLoad})</Alert>
+                </Box>
+            }
+
+
         </Box>
         <Divider sx={{ mt: 1, mb: 1 }} />
         <Box display={'flex'} justifyContent={'center'} gap={1}>

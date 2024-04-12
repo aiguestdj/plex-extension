@@ -17,7 +17,7 @@ const Page: NextPage = () => {
         errorBoundary(async () => {
             setGenerating(true);
 
-            const result = await axios.post<GetSpotifyAlbum | GetSpotifyPlaylist>(`${process.env.NEXT_PUBLIC_AIGUESTDJ_URL || "https://aiguestdj.com"}/api/import/spotify`, {
+            const result = await axios.post<GetSpotifyAlbum | GetSpotifyPlaylist>(`/api/spotify`, {
                 search: spotifyInput
             })
             setPlaylist(result.data)

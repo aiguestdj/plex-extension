@@ -18,6 +18,10 @@ The easiest way to use this extension is by starting a docker container. Once up
 
 Your Open AI API key is stored as an environment variable of the docker instance. You can find your API keys in your [User settings of Open AI](https://platform.openai.com/api-keys). If you don't have an API key you can remove this line.
 
+### Spotify import
+
+To use the Import Playlist option you need a Spotify API credentials to make the connection. You can get these credentials at the [Spotify Developer site](https://developer.spotify.com/). More information can also be found at the [Gettin started section](https://developer.spotify.com/documentation/web-api) of the documentation.
+
 ### Binding volume
 
 Binding a volume to the `/app/config` folder enables persistant storage of the configuration files. Currently the configuration is used to monitor the last requests made to Open AI. If you don't want to use persistant storage you can remove this line.
@@ -26,6 +30,8 @@ Binding a volume to the `/app/config` folder enables persistant storage of the c
 docker run -d \
     -e PORT=9020 \
     -e OPENAI_KEY=PASTE_YOUR_OPEN_AI_API_KEY_HERE \
+    -e SPOTIFY_API_CLIENT_ID=PASTE_YOUR_SPOTIFY_CLIENT_ID_HERE \
+    -e SPOTIFY_API_CLIENT_SECRET=PASTE_YOUR_SPOTIFY_CLIENT_SECRET_HERE \
     -v /local/directory/:/app/config:rw \
     --name=aiguestdj-plex \
     --network=host \
@@ -48,6 +54,8 @@ services:
         environment:
             - PORT=9020
             - OPENAI_KEY=PASTE_YOUR_OPEN_AI_API_KEY_HERE
+            - SPOTIFY_API_CLIENT_ID=PASTE_YOUR_SPOTIFY_CLIENT_ID_HERE
+            - SPOTIFY_API_CLIENT_SECRET=PASTE_YOUR_SPOTIFY_CLIENT_SECRET_HERE
         network_mode: "host"
         image: 'aiguestdj/plex-extension-aiguestdj:latest'
 ```

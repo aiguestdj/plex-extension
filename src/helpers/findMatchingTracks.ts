@@ -21,12 +21,14 @@ export type GetMatchingTrackResponse = {
     title: string;
     image: string;
     matching: {
-        title: { match: boolean, contains: boolean },
-        artist: { match: boolean, contains: boolean },
+        title: { match: boolean, contains: boolean, similarity: number },
+        artist: { match: boolean, contains: boolean, similarity: number },
+        artistInTitle: { match: boolean, contains: boolean, similarity: number },
+        artistWithTitle: { match: boolean, contains: boolean, similarity: number },
     }
 }
 
-export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySearchResponse)[], artist: string, track: string, debug: boolean = false): GetMatchingTrackResponse[] {
+export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySearchResponse)[], artist: string, track: string): GetMatchingTrackResponse[] {
     const foundTracks = items
         .filter(item => item.type == "track")
         .map(item => {
@@ -39,26 +41,14 @@ export function findMatchingTracks(items: (GetHubSearchResponse | GetDiscoverySe
                 image: item.image,
                 source: item.source,
                 matching: {
-                    title: compareTitles(item.title, track),
-                    artist: compareTitles(item.artist.title, artist),
+                    title: compareTitles(item.title, track, true),
+                    artistInTitle: compareTitles(item.title, `${artist}`),
+                    artistWithTitle: compareTitles(item.title, `${artist} ${track}`, true),
+                    artist: compareTitles(item.artist.title, artist, true),
                 }
             };
-            if (debug)
-                console.log(track, result)
             return result;
         })
-        .filter(item => (item.matching.artist.match || item.matching.artist.contains) &&
-            (item.matching.title.match || item.matching.title.contains)
-        )
-        .sort((a, b) => {
-            let aMatches = (a.matching.title.match ? 1 : 0) + (a.matching.artist.match ? 1 : 0);
-            let bMatches = (b.matching.title.match ? 1 : 0) + (b.matching.artist.match ? 1 : 0);
-            return aMatches - bMatches;
-        });
-
-    // Return only pure tracks
-    if (foundTracks.filter(item => item.matching.artist.match && item.matching.title.match).length > 0)
-        return foundTracks.filter(item => item.matching.artist.match && item.matching.title.match);
 
     return foundTracks
 }

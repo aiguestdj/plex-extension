@@ -2,42 +2,36 @@ import { findMatchingTracks } from "../findMatchingTracks";
 import doDiscoverSearch from "./doDiscoverSearch";
 import doHubSearch from "./doHubSearch";
 
-export async function searchForTrack(artist: string, track: string) {
+
+
+export async function searchForTrackInHubs(artist: string, track: string) {
     let search = `${artist} ${track}`;
 
-    const debug = false;
-    // First attempt @ Plex Media Server
-    {
-        const searchResult = await doHubSearch(search, 5, debug);
-        const result = findMatchingTracks(searchResult, artist, track);
-        if (result.length > 0)
-            return result;
-    }
+    const searchResult = await doHubSearch(search, 5);
+    const result = findMatchingTracks(searchResult, artist, track);
 
-    // Second attempt @ Plex Media Server - Looking for track only
-    {
-        let alternative = `${track}`;
-        const searchResult = await doHubSearch(alternative, 5, debug);
-        const result = findMatchingTracks(searchResult, artist, track);
-        if (result.length > 0)
-            return result;
-    }
+    let alternative = `${track}`;
+    const alternativeSearchResult = await doHubSearch(alternative, 5);
+    const alternativeResult = findMatchingTracks(alternativeSearchResult, artist, track);
+    alternativeResult.forEach(item => {
+        if (result.filter(existingItem => existingItem.guid == item.guid).length == 0)
+            result.push(item)
+    })
+    return result;
+}
 
-    // Almost final attempt - Search on the plex search provider
-    {
-        const searchResult = await doDiscoverSearch(search);
-        const result = findMatchingTracks(searchResult, artist, track);
-        if (result.length > 0)
-            return result;
-    }
-    // Final attempt - Search on the plex search provider
-    {
-        let alternative = `${track}`;
-        const searchResult = await doDiscoverSearch(alternative);
-        const result = findMatchingTracks(searchResult, artist, track);
-        if (result.length > 0)
-            return result;
-    }
+export async function searchForTrackInDiscovery(artist: string, track: string) {
+    let search = `${artist} ${track}`;
 
-    return []
+    const searchResult = await doDiscoverSearch(search);
+    const result = findMatchingTracks(searchResult, artist, track);
+
+    let alternative = `${track}`;
+    const alternativeSearchResult = await doDiscoverSearch(alternative);
+    const alternativeResult = findMatchingTracks(alternativeSearchResult, artist, track);
+    alternativeResult.forEach(item => {
+        if (result.filter(existingItem => existingItem.guid == item.guid).length == 0)
+            result.push(item)
+    })
+    return result;
 }

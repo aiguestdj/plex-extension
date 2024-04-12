@@ -1,5 +1,5 @@
 import { GetTrackResponse } from "@/pages/api/tracks";
-import Track from '@aiguestdj/shared/components/Track';
+import Track from "@aiguestdj/shared/components/Track";
 
 
 type Props = {
